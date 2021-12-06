@@ -55,7 +55,7 @@ public class PlayerMovement : MonoBehaviour
             flyBar.fillAmount += 1f * Time.deltaTime;
             while (flight < 3)
             {
-                flight += .0000001f; //make sure doesnt go over 3
+                flight += .0000001f; //make sure doesnt go over 3 //Error could be caused here?? number too small
             }
             if (Input.GetButtonDown("Jump")) //If on ground and jump //ButtonDown only activated the frame that button is pressd
             {
