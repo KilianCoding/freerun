@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44914883, g: 0.4992221, b: 0.5757174, a: 1}
+  m_IndirectSpecularColor: {r: 0.44914848, g: 0.49922144, b: 0.5757165, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -723,7 +723,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2d5467c15f4d6140969fe8b971c2065, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseSens: 100
+  mouseSens: 200
   playerBody: {fileID: 1610072574}
 --- !u!81 &1585961590
 AudioListener:
@@ -809,6 +809,7 @@ MonoBehaviour:
   CC: {fileID: 1610072573}
   gravity: -30
   jump: 10
+  flight: 1
 --- !u!143 &1610072573
 CharacterController:
   m_ObjectHideFlags: 0

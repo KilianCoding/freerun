@@ -8,6 +8,7 @@ public class PlayerMovement : MonoBehaviour
     float sprintspeed = 14f;
     public float gravity = -9.81f;
     public float jump = 10f;
+    public float flight = 1f;
     Vector3 velocity;
     // Start is called before the first frame update
     void Start()
@@ -36,9 +37,14 @@ public class PlayerMovement : MonoBehaviour
             speed = walkspeed;
         }
 
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Jump") && isGrounded()) //If on ground and jump //ButtonDown only activated the frame that button is pressd
         {
             velocity.y = jump;
+        }
+        else if (Input.GetButton("Jump") && !isGrounded() && flight > 0) //If space held while mid air  //GetButton activated every frame while space is pressed
+        {
+            flight -= 1f * Time.deltaTime; //Every frame you are flying, you can fly less
+            velocity.y = 10f; 
         }
 
         Vector3 move = transform.right * x + transform.forward * z; // Increase move right by x amount and move forwards by z amount. If s is pressed, then z would be negtive, moving you backwards
@@ -47,5 +53,10 @@ public class PlayerMovement : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime; //Adds gravity
         CC.Move(velocity * Time.deltaTime); //Applies gravity
+    }
+    private bool isGrounded()
+    {
+        flight = 10f; //Once you land, you can fly again
+        return false;
     }
 }
