@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.UI;
+
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -11,9 +13,11 @@ public class PlayerMovement : MonoBehaviour
     public float flight = 1f;
     Vector3 velocity;
     public Transform groundCheck;
+    public Transform flyCheck;
     float groundDistance = 0.2f;
     public LayerMask groundMask; //What layer the object is on
-    // Start is called before the first frame update
+    public Image flyBar;
+    // Start is called before the  first frame update
     void Start()
     {
         
@@ -22,6 +26,7 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update() 
     {
+        #region Movement
         float x = Input.GetAxis("Horizontal"); // + or - based on what key is being pressed (between a and d)
         float z = Input.GetAxis("Vertical"); // + or - between w and s)
 
@@ -39,26 +44,39 @@ public class PlayerMovement : MonoBehaviour
         {
             speed = walkspeed;
         }
+
+        #region Flight
         bool isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask); //If touching ground, returns true
+        bool isAir = Physics.CheckSphere(flyCheck.position, 0.5f, groundMask); //Checks a region under the player to see if there is ground there.
+        //isAir is necessary to allow you to jump. Otherwise, as soon space is pressed, velocity.y is overwritten by flight 
+
         if (isGrounded)
         {
-            flight = 1;
+            flyBar.fillAmount += 1f * Time.deltaTime;
+            while (flight < 3)
+            {
+                flight += .0000001f; //make sure doesnt go over 3
+            }
             if (Input.GetButtonDown("Jump")) //If on ground and jump //ButtonDown only activated the frame that button is pressd
             {
                 velocity.y = jump;
             }
         }
-        /*if (Input.GetButton("Jump") && !isGrounded && flight > 0) //If space held while mid air  //GetButton activated every frame while space is pressed
+        if (Input.GetButton("Jump") && !isAir && flight > 0) //If space held while far enough from ground  //GetButton activated every frame while space is pressed 
         {
             flight -= 5f * Time.deltaTime; //Every frame you are flying, you can fly less
-            velocity.y = 5f; 
-        }*/
+            velocity.y = 5f;
+            flyBar.fillAmount -= 1.7f * Time.deltaTime;
+        }
+        #endregion
 
         Vector3 move = transform.right * x + transform.forward * z; // Increase move right by x amount and move forwards by z amount. If s is pressed, then z would be negtive, moving you backwards
         CC.Move(move * speed * Time.deltaTime); //Apply move to the Character controller, * speed (to determine the speed) and Time.deltaTime
         //Time.deltaTime is the time elapsed between frames. EG: At 20 fps, it is 0.05 and at ps it is 0.1. This means that movement is consistent no matter what your fps
 
         velocity.y += gravity * Time.deltaTime; //Adds gravity
-        CC.Move(velocity * Time.deltaTime); //Applies gravity
+        CC.Move(velocity * Time.deltaTime); //Applies upwards movement. If you are not moving, then velocity is constantly being reduced by gravity
+
+        #endregion
     }
 }
