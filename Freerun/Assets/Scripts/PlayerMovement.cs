@@ -10,13 +10,14 @@ public class PlayerMovement : MonoBehaviour
     float sprintspeed = 14f;
     public float gravity = -9.81f;
     public float jump = 10f;
-    public float flight = 1f;
+    public float flight = 10f;
     Vector3 velocity;
     public Transform groundCheck;
     public Transform flyCheck;
     float groundDistance = 0.2f;
     public LayerMask groundMask; //What layer the object is on
     public Image flyBar;
+    bool canFly;
     // Start is called before the  first frame update
     void Start()
     {
@@ -47,27 +48,31 @@ public class PlayerMovement : MonoBehaviour
 
         #region Flight
         bool isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask); //If touching ground, returns true
-        bool isAir = Physics.CheckSphere(flyCheck.position, 0.5f, groundMask); //Checks a region under the player to see if there is ground there.
-        //isAir is necessary to allow you to jump. Otherwise, as soon space is pressed, velocity.y is overwritten by flight 
-
+        bool ballGrounded = Physics.CheckSphere(flyCheck.position, 0.5f, groundMask); //Checks a region under the player to see if there is ground there.
+        //canFly is necessary to allow you to jump. Otherwise, as soon space is pressed, velocity.y is overwritten by flight 
+            
+        if (!ballGrounded)
+        {
+            canFly = true; //No idea why this works, but allows you to be close to ground and start flying again
+        }
         if (isGrounded)
         {
-            flyBar.fillAmount += 1f * Time.deltaTime;
-            while (flight < 3)
+            canFly = false;
+            if (flight < 30)
             {
-                flight += .0000001f; //make sure doesnt go over 3
+                flight += 20f * Time.deltaTime; //For some reason
             }
             if (Input.GetButtonDown("Jump")) //If on ground and jump //ButtonDown only activated the frame that button is pressd
             {
                 velocity.y = jump;
             }
         }
-        if (Input.GetButton("Jump") && !isAir && flight > 0) //If space held while far enough from ground  //GetButton activated every frame while space is pressed 
+        if (Input.GetButton("Jump") && canFly && flight > 0) //If space held while far enough from ground  //GetButton activated every frame while space is pressed 
         {
-            flight -= 5f * Time.deltaTime; //Every frame you are flying, you can fly less
+            flight -= 50f * Time.deltaTime; //Every frame you are flying, you can fly less
             velocity.y = 5f;
-            flyBar.fillAmount -= 1.7f * Time.deltaTime;
         }
+        flyBar.fillAmount = flight / 30; //bar fill is the percentage of flight left
         #endregion
 
         Vector3 move = transform.right * x + transform.forward * z; // Increase move right by x amount and move forwards by z amount. If s is pressed, then z would be negtive, moving you backwards
