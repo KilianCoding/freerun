@@ -51,6 +51,11 @@ public class PlayerMovement : MonoBehaviour
         bool ballGrounded = Physics.CheckSphere(flyCheck.position, 0.5f, groundMask); //Checks a region under the player to see if there is ground there.
         //canFly is necessary to allow you to jump. Otherwise, as soon space is pressed, velocity.y is overwritten by flight 
             
+        if (isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f;
+        }
+
         if (!ballGrounded)
         {
             canFly = true; //No idea why this works, but allows you to be close to ground and start flying again
