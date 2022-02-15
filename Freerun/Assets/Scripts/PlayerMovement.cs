@@ -62,10 +62,10 @@ public class PlayerMovement : MonoBehaviour
         }
         if (isGrounded)
         {
-            canFly = false;
+            canFly = false; //This prevents jump being overwritten by flight (basically, you can't fly until you are a certain height above the ground, allowing you to jump and then fly)
             if (flight < 30)
             {
-                flight += 20f * Time.deltaTime; //For some reason
+                flight += 30f * Time.deltaTime; //For some reason
             }
             if (Input.GetButtonDown("Jump")) //If on ground and jump //ButtonDown only activated the frame that button is pressd
             {
