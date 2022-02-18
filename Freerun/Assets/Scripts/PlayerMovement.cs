@@ -5,13 +5,16 @@ using UnityEngine.UI;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] CharacterController CC;
-    float speed;
+    [SerializeField] float speed;
     float crouchSpeed = 3f;
     float walkSpeed = 7f;
     float sprintSpeed = 14f;
+    [SerializeField, Range(0, 10)] float slideSlow;
+    [SerializeField] bool sliding;
     [SerializeField] float gravity = -9.81f;
     [SerializeField] float jump = 10f;
     [SerializeField] float flight = 10f;
+    [SerializeField] float crouchRadius = 0.2f;
     Vector3 velocity;
     [SerializeField] Transform groundCheck, flyCheck, crouchCheck;
     [SerializeField] float groundDistance = 0.6f;
@@ -29,6 +32,7 @@ public class PlayerMovement : MonoBehaviour
     void Update() 
     {
         CC.stepOffset = 0f; //When the character is in the air, the slope limit is set to 0. This prevents the character from spazzing when when jumping onto something
+        
         #region Movement
         float x = Input.GetAxis("Horizontal"); // + or - based on what key is being pressed (between a and d)
         float z = Input.GetAxis("Vertical"); // + or - between w and s)
@@ -39,33 +43,50 @@ public class PlayerMovement : MonoBehaviour
             x = x / 1.25f;
         }
         
-        if (Input.GetKey("left shift")) //While left shift is being pressed, speed is increased (sprinting)
+        if (Input.GetKey("left shift") && !Input.GetKey("c")) //While left shift is being pressed, speed is increased (sprinting)
         {
             speed = sprintSpeed;
         }
-        else
+        else if (!Input.GetKey("left shift") && !sliding && !Input.GetKey("c")) //When you aren't running or crouching or sliding then you are set to walk speed
         {
             speed = walkSpeed;
         }
         #endregion
 
-        #region Crouching
-        bool crouchSphere = Physics.CheckSphere(crouchCheck.position, 0.2f, groundMask); //Checks a region under the player to see if there is ground there.
-        
-        if (Input.GetKey("left ctrl"))
+        #region Crouching and Sliding
+        bool crouchSphere = Physics.CheckSphere(crouchCheck.position, crouchRadius, groundMask); //Checks a region above the player to see if there is ground there.
+        sliding = false; //Allows you to be slowed to crouch speed
+
+        if (speed > crouchSpeed && isGrounded) //If you are walking and on the ground
+        {
+            if (speed > walkSpeed && Input.GetKey("c")) //If you are running and press c 
+            {
+                sliding = true; //You cannot be instantly slowed to crouch speed while sliding
+                speed = speed - (slideSlow * Time.deltaTime); //Gradually slow down
+            }
+            else if (speed < walkSpeed && Input.GetKey("c")) //If you are slower and you hold c then you will continue to slow down
+            {
+                sliding = true;
+                speed = speed - (slideSlow * Time.deltaTime);
+            }
+            //These if statements means that you can only start sliding when you are sprinting but can continue to slide even if you are slower than walk speed, you will keep sliding until you reach crouch speed
+        }
+
+
+        if (Input.GetKey("c"))
         {
             if (transform.localScale.y > 0.5f) //Prevents you from becoming flat
-            { transform.localScale = transform.localScale - new Vector3(0f, .05f, 0f); } //Used so that you gradually crouch //Can specify player.transform... but because this script is on the player it is assumed that you are acting on the player
+            { transform.localScale = transform.localScale - new Vector3(0f, 10f, 0f) * Time.deltaTime; } //Used so that you gradually crouch //Can specify player.transform... but because this script is on the player it is assumed that you are acting on the player
 
-
-            if (isGrounded)
-            { speed = crouchSpeed; } //You slow down, unless in the air
+            if (isGrounded && !sliding) 
+            { speed = crouchSpeed; } //You instantly slow down, unless in the air or you are sliding
         }
         else
         {
-            if (transform.localScale.y < 1f && !crouchSphere) //If you are not pressing ctrl and you are not already full size, return to normal size
-            { transform.localScale = transform.localScale + new Vector3(0f, .05f, 0f); } //Used to not instantly uncrouch
-            else if (transform.localScale.y < 1f)
+            if (transform.localScale.y < 1f && !crouchSphere) //If you are not pressing ctrl, not underneeth anything and you are not already full size, return to normal size
+            { transform.localScale = transform.localScale + new Vector3(0f, 10f, 0f) * Time.deltaTime; } //Used to not instantly uncrouch
+
+            else if (transform.localScale.y < 1f && !sliding) //If you are smaller than normal and not sliding, go to crouch speed (basically if you are under something but not holding c)
             { speed = crouchSpeed; }
         }
         #endregion
@@ -76,26 +97,20 @@ public class PlayerMovement : MonoBehaviour
         //canFly is necessary to allow you to jump. Otherwise, as soon space is pressed, velocity.y is overwritten by flight 
             
         if (isGrounded && velocity.y < 0)
-        {
-            velocity.y = -6f;
-        }
+        {velocity.y = -6f;}
 
         if (!ballGrounded)
-        {
-            canFly = true; //No idea why this works, but allows you to be close to ground and start flying again
-        }
+        {canFly = true;} //No idea why this works, but allows you to be close to ground and start flying again
+        
         if (isGrounded)
         {
             CC.stepOffset = 0.7f; //Earler, we set step offset to 0 when in the air. This makes slope limit .7 on the ground, allowing you to climb stairs and slopes (not sure if this is necessary, but probably good practice to have this reset once you reach the ground)
             canFly = false; //This prevents jump being overwritten by flight (basically, you can't fly until you are a certain height above the ground, allowing you to jump and then fly)
             if (flight < 30)
-            {
-                flight += 30f * Time.deltaTime; //For some reason
-            }
+            { flight += 30f * Time.deltaTime; } //For some reason
+            
             if (Input.GetButtonDown("Jump")) //If on ground and jump //ButtonDown only activated the frame that button is pressd
-            {
-                velocity.y = jump;
-            }
+            {velocity.y = jump;}
         }
         if (Input.GetButton("Jump") && canFly && flight > 0) //If space held while far enough from ground  //GetButton activated every frame while space is pressed 
         {

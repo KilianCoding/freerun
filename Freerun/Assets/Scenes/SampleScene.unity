@@ -222,7 +222,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 286609633}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.41, z: 0}
+  m_LocalPosition: {x: 0, y: 0.87, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 747742214}
@@ -2918,9 +2918,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CC: {fileID: 1496897573}
+  speed: 0
+  slideSlow: 7
+  sliding: 0
   gravity: -30
   jump: 10
   flight: 30
+  crouchRadius: 0.5
   groundCheck: {fileID: 453768760}
   flyCheck: {fileID: 979451541}
   crouchCheck: {fileID: 286609634}
@@ -3137,7 +3141,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1764360018}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.12, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1496897574}
